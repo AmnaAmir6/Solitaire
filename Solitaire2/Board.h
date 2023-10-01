@@ -5,6 +5,7 @@
 #include"QueueDeck.h"
 #include"FreeCell.h"
 
+
 class Pile;
 class Board
 {
@@ -35,13 +36,14 @@ private:
 	sf::Text _Score;
 	sf::Text _Move;
 	sf::Text Timetxt;
-
+	
 	
 	void emptyStack();
 public:
 	Board(int _NOC);
 	Board(const Board& _B);
 	void draw(sf::RenderWindow& window);
+	void draw(sf::RenderWindow& window,sf::Sound& ShuffleCard);
 	void drawPiles(sf::RenderWindow& window);
 	void drawUndoRedo(sf::RenderWindow& window);
 	void drawScore(sf::RenderWindow& window);
@@ -55,12 +57,14 @@ public:
 	bool isUndoClicked(int r, int c);
 	bool isRedoClicked(int r, int c);
 	void RevealDeck();
-	void MovetoDc(sf::RenderWindow& window);
+	void MovetoDc(sf::RenderWindow& window,sf::Sound& CardSound, sf::Sound& FreePileSound, bool& isPlayed,int& _Moves);
 	void MovetoSc();
 	void move(int r, int c);
 	void CardWinAnimation(sf::RenderWindow& window);
 	bool isWin();
 	void displayTime(sf::RenderWindow& window);
+	void displayWin(sf::RenderWindow& window);
 	void setTime(int t);
+	void setMoves(int m);
 };
 

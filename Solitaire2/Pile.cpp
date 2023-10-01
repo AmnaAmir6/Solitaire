@@ -116,7 +116,6 @@ void Pile::draw(sf::RenderWindow& window,Pile** Ps,sf::Sprite bg, Board* B)
 {
 	int i = 0;
 	int x = 0, y = 0;
-
 	if (isFirst)
 	{
 		isFirst = false;

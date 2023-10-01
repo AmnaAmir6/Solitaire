@@ -57,6 +57,7 @@ Board::Board(int _NOC)
     Redo.scale(0.2, 0.2);
     Redo.setPosition(1250, 600);
 
+    
     //---------initialize variables
     this->NOC = _NOC;
     this->pileNo = -1;
@@ -70,6 +71,7 @@ Board::Board(int _NOC)
     this->dri = -1;
     this->dci = -1;
     this->isAutoMove = false;
+    this->time = 0;
    
     //-------Create and shuffle deck
     deck = new Deck();
@@ -116,7 +118,7 @@ Board::Board(const Board& _B)
 {
     this->NOC = _B.NOC;
     this->score = _B.score;
-    this->moves = _B.moves;
+    //this->moves = _B.moves;
     this->ScoreFont = _B.ScoreFont;
     this->_Score = _B._Score;
     this->_Move = _B._Move;
@@ -187,6 +189,20 @@ void Board::draw(sf::RenderWindow& window)
     drawFreeCells(window);
     QD->draw(window);
     drawPiles(window);
+    drawSelectedCards(window);
+}
+void Board::draw(sf::RenderWindow& window,sf::Sound& ShuffleCard)
+{
+    window.draw(bg);
+    drawUndoRedo(window);
+    drawScore(window);
+    drawMoves(window);
+    displayTime(window);
+    drawFreeCells(window);
+    QD->draw(window);
+    ShuffleCard.play();
+    drawPiles(window);
+    ShuffleCard.stop();
     drawSelectedCards(window);
 }
 
@@ -320,10 +336,12 @@ void Board::emptyStack()
     dci = -1;
 }
 
-void Board::MovetoDc(sf::RenderWindow& window)
+void Board::MovetoDc(sf::RenderWindow& window, sf::Sound& CardSound, sf::Sound& FreePileSound,bool& isPlayed, int& _Moves)
 {
+    moves = _Moves;
     bool isMoved = false;
     bool pileApn = false;
+    isPlayed = false;
     if (isAutoMove)
     {
         if (SelectedCards.size() == 1)
@@ -336,10 +354,12 @@ void Board::MovetoDc(sf::RenderWindow& window)
                     {
                         Cs[i]->append(SelectedCards.back());
                         DcPileNo = 7 + i;
+                        FreePileSound.play();
                         CardWinAnimation(window);
                         score += 15;
                         moves += 1;
                         isMoved = true;
+                        isPlayed = true;
                         break;
                     }
                 }
@@ -355,9 +375,11 @@ void Board::MovetoDc(sf::RenderWindow& window)
                     if (Ps[i]->canAppend(SelectedCards))
                     {
                         Ps[i]->append(SelectedCards);
+                        CardSound.play();
                         score += 5;
                         moves += 1;
                         isMoved = true;
+                        isPlayed = true;
                         break;
                     }
                 }
@@ -372,17 +394,23 @@ void Board::MovetoDc(sf::RenderWindow& window)
         if (DcPileNo > 6)
         {
             Cs[DcPileNo - 7]->append(SelectedCards.back());
+            FreePileSound.play();
             CardWinAnimation(window);
             score += 15;
             moves += 1;
             isMoved = true;
+            isPlayed = true;
+
         }
         else
         {
             Ps[DcPileNo]->append(SelectedCards);
+            CardSound.play();
             pileApn = true;
             moves += 1;
             isMoved = true;
+            isPlayed = true;
+
         }
     }
     if(isMoved)
@@ -402,6 +430,7 @@ void Board::MovetoDc(sf::RenderWindow& window)
         }
     }
     emptyStack();
+    _Moves = moves;
 }
 
 void Board::MovetoSc()
@@ -424,7 +453,6 @@ bool Board::isDeckClicked(int r, int c)
 {
     if (QD->isDClicked(r, c))
     {
-        moves += 1;
         return true;
     }
     return false;
@@ -534,11 +562,50 @@ void Board::displayTime(sf::RenderWindow& window)
         << std::setfill('0') << std::setw(2) << minutes << ":"
         << std::setfill('0') << std::setw(2) << seconds;
 
-    Timetxt.setString(ss.str());
+    Timetxt.setString("Time   "+ss.str());
     window.draw(Timetxt);
+}
+
+
+void Board::displayWin(sf::RenderWindow& window)
+{
+    Card A1(HEARTS, ACE, true);
+    Card A2(CLUBS, ACE, true);
+    Card A3(DIAMONDS, ACE, true);
+    Card A4(SPADES, ACE, true);
+    for (int x = 0; x < 150; x++)
+    {
+        A1.Draw(window,Cs[0]->getPostion().x + x, Cs[0]->getPostion().y + x);
+        A2.Draw(window, Cs[1]->getPostion().x + x, Cs[1]->getPostion().y + x);
+        A3.Draw(window, Cs[2]->getPostion().x + x, Cs[2]->getPostion().y + x);
+        A4.Draw(window, Cs[3]->getPostion().x + x, Cs[3]->getPostion().y + x);
+        window.display();
+    }
+    for (int x = 0; x < 300; x++)
+    {
+        A1.Draw(window, Cs[0]->getPostion().x + x+150, Cs[0]->getPostion().y - x+150);
+        A2.Draw(window, Cs[1]->getPostion().x + x+150, Cs[1]->getPostion().y - x+150);
+        A3.Draw(window, Cs[2]->getPostion().x + x+150, Cs[2]->getPostion().y - x+150);
+        A4.Draw(window, Cs[3]->getPostion().x + x+150, Cs[3]->getPostion().y - x+150);
+        window.display();
+    }
+    sf::Text Win("Win", ScoreFont, 400);
+    sf::Color gold(204, 191, 63);
+    Win.setFillColor(gold);
+    Win.setOutlineColor(sf::Color::Black);
+    Win.setOutlineThickness(8);
+    Win.setPosition(450, 50);
+    window.draw(Win);
+    window.display();
+    sf::sleep(sf::seconds(3));
 }
 
 void Board::setTime(int t)
 {
     time = t;
+}
+
+void Board::setMoves(int m)
+{
+    moves = m;
 }

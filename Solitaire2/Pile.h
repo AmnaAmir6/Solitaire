@@ -18,6 +18,7 @@ private:
 	bool topCardSelected;
 	bool isFirst;
 	sf::RectangleShape Rec;
+	
 public:
 	Pile(int size, Deck* D, int ri, int ci);
 	Pile(const Pile& P);

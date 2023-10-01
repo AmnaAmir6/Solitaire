@@ -151,10 +151,13 @@ void QueueDeck::showNextTop(int& score)
 		showNext(score);
 	else
 	{
-		Show.push_back(Hide.front());
-		Show[Show.size() - 1]->setFace(true);
-		Hide.pop();
-		size--;
+		if(Show.size()<NOC)
+		{
+			Show.push_back(Hide.front());
+			Show[Show.size() - 1]->setFace(true);
+			Hide.pop();
+			size--;
+		}
 	}
 	/*if (Hide.size() == 0 && Help.size() != 0)
 	{
